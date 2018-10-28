@@ -4,13 +4,13 @@ from tkinter import tix
 from tkinter.simpledialog import askstring
 
 
-BAREME = dict(
+BAREME = dict((
 ((2,0),4),
 ((2,1),3),
 ((1,1),2),
 ((1,2),2),
 ((0,2),1),
-)
+))
 
 
 class Player :
@@ -53,10 +53,13 @@ class App :
             self.sort()
 
     def new_match(self):
-        tl = tix.TopLevel(self.main)
+        tl = tix.Toplevel(self.main)
         p1,p2 = tix.ComboBox(tl),tix.ComboBox(tl)
-        score_p1, score_p2 = tix.Entry(tl, editable=True), tix.Entry(tl, editable=True)
-        ok = tix.Button(tl, text="OK", command=lambda :self._process(locals()))
+        score_p1, score_p2 = tix.Entry(tl), tix.Entry(tl)
+        ok = tix.Button(tl, text="OK",
+                command=lambda : self._process(
+                    p1=p1, p2=p2, score_p1=score_p1, score_p2=score_p2, tl=tl
+                ))
         names = [pl.name for pl in self.players]
         p1.slistbox.listbox.insert(0, *names)
         p2.slistbox.listbox.insert(0, *names)
@@ -68,10 +71,9 @@ class App :
         p2.grid(row=0,column=4)
         ok.grid(row=1, column=2)
 
-    def _process(self, **kwargs):
-        locals().update(kwargs)
-        p1 = Players.players[p1["value"]]
-        p2 = Players.players[p2["value"]]
+    def _process(self, *, p1, p2, score_p1, score_p2, tl):
+        p1 = Player.players[p1["value"]]
+        p2 = Player.players[p2["value"]]
         score_p1 = int(score_p1.get())
         score_p2 = int(score_p2.get())
         tl.destroy()
@@ -81,6 +83,11 @@ class App :
         self.sort()
 
     def sort(self):
-        self.players.sort(key=lambda player:player.score)
+        self.players.sort(key=lambda player:player.score, reverse=True)
         self.leftpane.listbox.delete(0, "end")
         self.leftpane.listbox.insert(0, *self.players)
+
+
+if __name__ == '__main__':
+    app = App()
+    app.main.mainloop()
